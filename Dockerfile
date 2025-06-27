@@ -1,38 +1,53 @@
 # Start from the NVIDIA CUDA base image
-FROM nvidia/cuda:12.1.0-base-ubuntu22.04
+FROM nvidia/cuda:12.8.0-base-ubuntu22.04
 
 # Set a fixed model cache directory.
-ENV TORCH_HOME=/root/.cache/torch
-
+ARG USR="unsloth"
+ARG UID=1000
+ARG GID=1000
+ARG PIP_CACHE="/home/${USR}/.cache/pip"
+ENV TORCH_HOME="/home/${USR}/.cache/torch"
+ENV CONDA_DIR="/home/${USR}/conda"
 # Install Python and necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget build-essential python3.10 python3-pip python3.10-dev \
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    wget build-essential python3.11 python3-pip python3.11-dev \
     git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN groupadd -r ${USR} -g ${GID} && useradd -l -u ${UID} -r -m -g ${USR} ${USR}
+USER ${USR}
+WORKDIR /home/${USR}
+
 # update pip and setuptools
-RUN python3.10 -m pip install --upgrade pip setuptools wheel
+RUN python3.11 -m pip install --upgrade pip setuptools wheel
 
 # install miniconda
-ENV CONDA_DIR /opt/conda
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda
+
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p ${CONDA_DIR}
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # install PyTorch with CUDA 12.1 support and other essential packages
 # use a dedicated conda env 
-RUN conda create --name unsloth_env python=3.10
+RUN conda create --name unsloth_env python=3.11
 RUN echo "source activate unsloth_env" > ~/.bashrc
-ENV PATH /opt/conda/envs/unsloth_env/bin:$PATH
+ENV PATH=/opt/conda/envs/unsloth_env/bin:$PATH
 
 # as described in the Unsloth.ai Github
-RUN conda install -n unsloth_env -y pytorch-cuda=12.1 pytorch cudatoolkit xformers -c pytorch -c nvidia -c xformers
-RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
-RUN pip install matplotlib
-RUN pip install --no-deps trl peft accelerate bitsandbytes
-RUN pip install autoawq
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    conda run -n unsloth_env pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
+    conda run -n unsloth_env pip install xformers
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
+    conda run -n unsloth_env pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
+    conda run -n unsloth_env pip install matplotlib  && \
+    conda run -n unsloth_env pip install --no-deps trl peft accelerate bitsandbytes  && \
+    conda run -n unsloth_env pip install autoawq
 
 # copy the fine-tuning script into the container
 COPY ./unsloth_trainer.py /trainer/unsloth.trainer.py
