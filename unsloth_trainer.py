@@ -1,20 +1,23 @@
+import unsloth
 import os
 import torch
 
 from transformers import TrainingArguments
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
-from datasets import Dataset, load_from_disk
+from datasets import Dataset, load_from_disk, load_dataset
 from unsloth import FastLanguageModel
 
 MODEL_ID = "unsloth/gemma-7b-bnb-4bit" # Quantized models from unsloth for faster downloading
 TRAINING_DATA_PATH = "path/to/training-dataset"
 OUTPUT_DATA_PATH = "path/where/model/is/stored"
 NUM_EPOCHS = 1
+NUM_PROC = 12  # Number of processes for dataset processing
+max_seq_length = 2048  # Added definition
 
 # Load model
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=MODEL_ID,
-    max_seq_length=2048, # adjust to your sequence length
+    max_seq_length=max_seq_length, # use variable
     dtype=None,
     load_in_4bit=True,
 )
@@ -41,7 +44,17 @@ model = FastLanguageModel.get_peft_model(
     loftq_config=None,
 )
 
-dataset = ds.load_from_disk(TRAINING_DATA_PATH)
+#dataset = load_from_disk(TRAINING_DATA_PATH)
+dataset = load_dataset("mlabonne/FineTome-100k", split = "train")
+
+# Define a simple formatting function (placeholder)
+def format_prompts_func(examples):
+   convos = examples["conversations"]
+   texts = [tokenizer.apply_chat_template(convo, tokenize = False, add_generation_prompt = False).removeprefix('<bos>') for convo in convos]
+   return { "text" : texts, }
+
+# Initialize data collator
+data_collator = DataCollatorForCompletionOnlyLM(tokenizer=tokenizer)
 
 sft_trainer = SFTTrainer(
     model=model,
@@ -50,7 +63,7 @@ sft_trainer = SFTTrainer(
     data_collator=data_collator,
     formatting_func=format_prompts_func,
     max_seq_length=max_seq_length,
-    dataset_num_proc=2,
+    dataset_num_proc=NUM_PROC,
     packing=False, 
     args=TrainingArguments(
         gradient_accumulation_steps=4,
@@ -66,6 +79,8 @@ sft_trainer = SFTTrainer(
         lr_scheduler_type="linear",
         seed=1133,
         output_dir=OUTPUT_DATA_PATH,
+        report_to="tensorboard",  # Enable TensorBoard logging
+        logging_dir=os.path.join(OUTPUT_DATA_PATH, "runs"),  # TensorBoard log directory
     ),
 )
 sft_trainer.train()
