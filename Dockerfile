@@ -1,5 +1,5 @@
 # Start from the NVIDIA CUDA base image
-FROM nvidia/cuda:12.8.0-base-ubuntu22.04
+FROM nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04
 
 # Set a fixed model cache directory.
 ARG USR="unsloth"
@@ -13,7 +13,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     --mount=target=/var/cache/apt,type=cache,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
     wget build-essential python3.11 python3-pip python3.11-dev \
-    git \
+    git ca-certificates openssh-server \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,7 +32,7 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-# install PyTorch with CUDA 12.1 support and other essential packages
+# install PyTorch with CUDA 12.9 to support SM_120
 # use a dedicated conda env 
 RUN conda create --name unsloth_env python=3.11
 RUN echo "source activate unsloth_env" > ~/.bashrc
@@ -50,9 +50,9 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     conda run -n unsloth_env pip install autoawq
 
 # copy the fine-tuning script into the container
-COPY ./unsloth_trainer.py /trainer/unsloth.trainer.py
+COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
 
-WORKDIR /trainer
+WORKDIR /home/${USR}
 
 # endless running task to avoid container to be stopped
 CMD [ "/bin/sh" , "-c", "tail -f /dev/null" ]
