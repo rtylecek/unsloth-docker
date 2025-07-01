@@ -4,10 +4,8 @@ if [ "$1" == "-h" ]; then
   exit 0
 fi
 
-echo "rgr-docker: starting shelf monitor v$1 on GPU#$2"
+echo "unsloth-docker: starting v$1 on GPU#$2"
 export HOST_DATA=$3
-export HOST_SITES=$4
-export HOST_EMBED="rgr_products"
 export USER_HOME="/home/unsloth"
 export HF_DATA="$USER_HOME/.cache/huggingface/"
 
@@ -19,4 +17,4 @@ docker run -it --rm \
     --network=host \
     unsloth:$1 \
     python3 unsloth_trainer.py \
-    $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14}
+    $3 $4 $5 $6 $7 $8 $9
