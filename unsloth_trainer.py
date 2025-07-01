@@ -54,7 +54,7 @@ def format_prompts_func(examples):
    return { "text" : texts, }
 
 # Initialize data collator
-data_collator = DataCollatorForCompletionOnlyLM(tokenizer=tokenizer)
+data_collator = DataCollatorForCompletionOnlyLM(tokenizer=tokenizer, response_template="<|endoftext|>", padding=True, max_length=max_seq_length)
 
 sft_trainer = SFTTrainer(
     model=model,
