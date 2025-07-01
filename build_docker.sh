@@ -20,7 +20,7 @@ find ./ -iname *egg-info -exec rm -rf \{\} \; && \
 
 echo "Building docker $DOCKER_NAME:$VERSION for uid=$UID gid=$GID"
 id
-docker build -f docker/$DOCKER_NAME.dockerfile $1 $2 $3 $4 \
+docker build $1 $2 $3 $4 \
     --network=host --build-arg UID=$UID --build-arg GID=$GID \
     -t $DOCKER_NAME:$VERSION . \
     |& tee docker.log
