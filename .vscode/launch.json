@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Train Unsloth Model",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/unsloth_trainer.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {},
+            "args": []
+        }
+    ]
+}
