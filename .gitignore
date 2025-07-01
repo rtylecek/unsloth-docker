@@ -1,2 +1,4 @@
 __pycache__
 unsloth_compiled_cache
+
+*.log
