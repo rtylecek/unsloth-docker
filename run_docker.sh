@@ -8,11 +8,12 @@ echo "unsloth-docker: starting v$1 on GPU#$2"
 export HOST_DATA=$3
 export USER_HOME="/home/unsloth"
 export HF_DATA="$USER_HOME/.cache/huggingface/"
+export TRAIN_PATH="$USER_HOME/train"
 
 # -v $PWD:$USER_HOME
 docker run -it --rm \
     --user $(id -u):$(id -g) \
-    --volume $HOST_DATA:$HF_DATA \
+    --volume $HOST_DATA:$HF_DATA --volume ./:$TRAIN_PATH \
     --gpus device=$2 \
     --network=host \
     unsloth:$1 \
