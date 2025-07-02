@@ -3,12 +3,11 @@
 # example: ./build_docker.sh --no-cache
 
 export DOCKER_NAME=unsloth
-#export DOCKER_NAME=rgr-base
-export DOCKER_REGISTRY=localhost:5000
-# docker run -d -p 5000:5000 --name registry registry:2.7
-docker start registry
+# export DOCKER_REGISTRY=localhost:5000
+# # docker run -d -p 5000:5000 --name registry registry:2.7
+# docker start registry
 
-export DOCKER_BUILDKIT=1
+#export DOCKER_BUILDKIT=1
 export VERSION=0.1
 #export VERSION=$(cat version)
 #export UID=$(id -u)
@@ -29,6 +28,6 @@ docker build $1 $2 $3 $4 \
 docker tag $DOCKER_NAME:$VERSION $DOCKER_NAME:latest
 
 # register the image
-docker tag $DOCKER_NAME:$VERSION $DOCKER_REGISTRY/$DOCKER_NAME:$VERSION
-docker push $DOCKER_REGISTRY/$DOCKER_NAME:$VERSION
-curl http://$DOCKER_REGISTRY/v2/_catalog
+# docker tag $DOCKER_NAME:$VERSION $DOCKER_REGISTRY/$DOCKER_NAME:$VERSION
+# docker push $DOCKER_REGISTRY/$DOCKER_NAME:$VERSION
+# curl http://$DOCKER_REGISTRY/v2/_catalog
