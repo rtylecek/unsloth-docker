@@ -47,7 +47,9 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
     conda run -n unsloth_env pip install matplotlib  && \
     conda run -n unsloth_env pip install --no-deps trl peft accelerate bitsandbytes  && \
-    conda run -n unsloth_env pip install autoawq
+    conda run -n unsloth_env pip install autoawq tensorboard
+
+RUN echo "source activate unsloth_env" > ~/.bashrc
 
 # copy the fine-tuning script into the container
 COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
@@ -55,4 +57,4 @@ COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
 WORKDIR /home/${USR}
 
 # endless running task to avoid container to be stopped
-CMD [ "/bin/sh" , "-c", "tail -f /dev/null" ]
+CMD [ "/bin/bash" , "-c", "tail -f /dev/null" ]
