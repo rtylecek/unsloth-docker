@@ -9,7 +9,13 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {},
-            "args": []
+            "args": [
+                "--model", "unsloth/gemma-7b-bnb-4bit",
+                "--output_path", "~/Code/unsloth-docker/output/gemma-7b-bnb-4bit",
+                "--num_epochs=1",
+                "--num_proc=12",
+                "--seq_length=2048"
+            ]
         }
     ]
 }
