@@ -13,7 +13,7 @@ export TRAIN_PATH="$USER_HOME/train"
 # -v $PWD:$USER_HOME
 docker run -it --rm \
     --user $(id -u):$(id -g) \
-    --volume $HOST_DATA:$HF_DATA --volume ./:$TRAIN_PATH \
+    --volume $HOST_DATA:$HF_DATA --volume $PWD:$TRAIN_PATH \
     --gpus device=$2 \
     --network=host \
     unsloth:$1 \
