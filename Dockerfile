@@ -34,7 +34,7 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     /bin/bash ~/miniconda.sh -b -p ${CONDA_DIR}
 
 RUN wget -qO- https://astral.sh/uv/install.sh | sh
-ENV UV_HTTP_TIMEOUT=120
+ENV UV_HTTP_TIMEOUT=600
 ENV PATH=${CONDA_DIR}/bin:/home/${USR}/.local/bin:$PATH
 
 # as described in the Unsloth.ai Github
