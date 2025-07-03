@@ -36,10 +36,27 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 
 # as described in the Unsloth.ai Github
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
-    pip install xformers
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    pip install -U vllm --torch-backend=cu128 --extra-index-url https://wheels.vllm.ai/nightly
+
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    pip install unsloth
+    pip install unsloth unsloth_zoo bitsandbytes
+
+# build xformers from source
+RUN pip uninstall xformers -y
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    bash /home/${USR}/xformers_blackwell.sh && \
+    rm -rf /home/${USR}/xformers_blackwell.sh
+
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    pip install -U triton>=3.3.1
+
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
+    pip install -U transformers==4.52.4
+
+# extras
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
     pip install matplotlib  && \
     pip install --no-deps trl peft accelerate bitsandbytes && \
