@@ -16,6 +16,5 @@ docker run -it --rm \
     --gpus device=$2 \
     --network=host \
     unsloth:$1 \
-    conda run -n unsloth_env \
     python3 unsloth_trainer.py \
     $5 $6 $7 $8 $9
