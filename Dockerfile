@@ -8,7 +8,6 @@ ARG GID=1000
 ARG PIP_CACHE="/home/${USR}/.cache/pip"
 ENV TORCH_HOME="/home/${USR}/.cache/torch"
 ENV CONDA_DIR="/home/${USR}/conda"
-ENV PYTHON_VER="3.12"
 
 SHELL ["/bin/bash", "-c"]
 
@@ -35,24 +34,16 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
 
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-# install PyTorch with CUDA 12.9 to support SM_120
-# use a dedicated conda env 
-RUN conda create --name unsloth_env python=${PYTHON_VER}
-RUN echo "source activate unsloth_env" > ~/.bashrc
-ENV PATH=/opt/conda/envs/unsloth_env/bin:$PATH
-
 # as described in the Unsloth.ai Github
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    conda run -n unsloth_env pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
-    conda run -n unsloth_env pip install xformers
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
+    pip install xformers
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    conda run -n unsloth_env pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+    pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    conda run -n unsloth_env pip install matplotlib  && \
-    conda run -n unsloth_env pip install --no-deps trl peft accelerate bitsandbytes && \
-    conda run -n unsloth_env pip install autoawq tensorboard
-
-RUN echo "source activate unsloth_env" > ~/.bashrc
+    pip install matplotlib  && \
+    pip install --no-deps trl peft accelerate bitsandbytes && \
+    pip install autoawq tensorboard
 
 # copy the fine-tuning script into the container
 COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
