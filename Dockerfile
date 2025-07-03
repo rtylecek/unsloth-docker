@@ -6,6 +6,7 @@ ARG USR="unsloth"
 ARG UID=1000
 ARG GID=1000
 ARG PIP_CACHE="/home/${USR}/.cache/pip"
+ARG UV_CACHE="/home/${USR}/.cache/uv"
 ENV TORCH_HOME="/home/${USR}/.cache/torch"
 ENV CONDA_DIR="/home/${USR}/conda"
 
@@ -32,35 +33,45 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py312_25.5.1-0-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p ${CONDA_DIR}
 
-ENV PATH=$CONDA_DIR/bin:$PATH
+RUN wget -qO- https://astral.sh/uv/install.sh | sh
+ENV UV_HTTP_TIMEOUT=120
+ENV PATH=${CONDA_DIR}/bin:/home/${USR}/.local/bin:$PATH
 
 # as described in the Unsloth.ai Github
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    pip install -U vllm --torch-backend=cu128 --extra-index-url https://wheels.vllm.ai/nightly
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system -U vllm --torch-backend=cu128 --extra-index-url https://wheels.vllm.ai/nightly
 
-RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    pip install unsloth unsloth_zoo bitsandbytes
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system unsloth unsloth_zoo bitsandbytes
 
 # build xformers from source
 RUN pip uninstall xformers -y
+ADD --chown=${USR}:${USR} xformers_blackwell.sh /home/${USR}/xformers_blackwell.sh
+RUN chmod +x /home/${USR}/xformers_blackwell.sh
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     bash /home/${USR}/xformers_blackwell.sh && \
     rm -rf /home/${USR}/xformers_blackwell.sh
 
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    pip install -U triton>=3.3.1
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system -U triton>=3.3.1
 
-RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    pip install -U transformers==4.52.4
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system -U transformers==4.52.4
 
 # extras
-RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    pip install matplotlib  && \
-    pip install --no-deps trl peft accelerate bitsandbytes && \
-    pip install autoawq tensorboard
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system matplotlib  && \
+    uv pip install --system --no-deps trl peft accelerate bitsandbytes && \
+    uv pip install --system autoawq tensorboard
 
 # copy the fine-tuning script into the container
 COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
