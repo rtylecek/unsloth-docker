@@ -8,21 +8,24 @@ ARG GID=1000
 ARG PIP_CACHE="/home/${USR}/.cache/pip"
 ENV TORCH_HOME="/home/${USR}/.cache/torch"
 ENV CONDA_DIR="/home/${USR}/conda"
+ENV PYTHON_VER="3.12"
 # Install Python and necessary packages
 RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     --mount=target=/var/cache/apt,type=cache,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
-    wget build-essential python3.11 python3-pip python3.11-dev \
+    wget build-essential python${PYTHON_VER} python3-pip python${PYTHON_VER}-dev \
     git ca-certificates openssh-server \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -r ${USR} -g ${GID} && useradd -l -u ${UID} -r -m -g ${USR} ${USR}
+# Create group and user only if they do not exist
+RUN getent group ${USR} || groupadd -r ${USR} -g ${GID} && \
+    id -u ${USR} &>/dev/null || useradd -l -u ${UID} -r -m -g ${USR} ${USR}
 USER ${USR}
 WORKDIR /home/${USR}
 
 # update pip and setuptools
-RUN python3.11 -m pip install --upgrade pip setuptools wheel
+RUN python${PYTHON_VER} -m pip install --upgrade pip setuptools wheel
 
 # install miniconda
 
@@ -34,7 +37,7 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 
 # install PyTorch with CUDA 12.9 to support SM_120
 # use a dedicated conda env 
-RUN conda create --name unsloth_env python=3.11
+RUN conda create --name unsloth_env python=${PYTHON_VER}
 RUN echo "source activate unsloth_env" > ~/.bashrc
 ENV PATH=/opt/conda/envs/unsloth_env/bin:$PATH
 
