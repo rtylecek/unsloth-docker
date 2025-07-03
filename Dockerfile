@@ -33,11 +33,12 @@ RUN id -u ${USR} &>/dev/null || useradd -l -u ${UID} -r -m -g ${USR} ${USR}
 USER ${USR}
 WORKDIR /home/${USR}
 
-# install miniconda
+# Install miniconda with Python 3.12
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py312_25.5.1-0-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p ${CONDA_DIR}
 
+# Install uv, required for setting torch backend
 RUN wget -qO- https://astral.sh/uv/install.sh | sh
 ENV UV_HTTP_TIMEOUT=600
 ENV PATH=${CONDA_DIR}/bin:/home/${USR}/.local/bin:$PATH
