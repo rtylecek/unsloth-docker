@@ -39,7 +39,7 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
     pip install xformers
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
-    pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+    pip install unsloth
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \ 
     pip install matplotlib  && \
     pip install --no-deps trl peft accelerate bitsandbytes && \
