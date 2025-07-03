@@ -37,6 +37,12 @@ RUN wget -qO- https://astral.sh/uv/install.sh | sh
 ENV UV_HTTP_TIMEOUT=600
 ENV PATH=${CONDA_DIR}/bin:/home/${USR}/.local/bin:$PATH
 
+# extras
+RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
+    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
+    uv pip install --system matplotlib  && \
+    uv pip install --system autoawq tensorboard
+    #uv pip install --system --no-deps trl peft accelerate bitsandbytes 
 # as described in the Unsloth.ai Github
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
@@ -65,13 +71,6 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
 RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
     uv pip install --system -U transformers==4.52.4
-
-# extras
-RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
-    --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
-    uv pip install --system matplotlib  && \
-    uv pip install --system --no-deps trl peft accelerate bitsandbytes && \
-    uv pip install --system autoawq tensorboard
 
 # copy the fine-tuning script into the container
 COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
