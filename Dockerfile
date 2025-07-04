@@ -84,10 +84,7 @@ RUN --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${PIP_CACHE} \
     --mount=type=cache,mode=0755,uid=${UID},gid=${GID},target=${UV_CACHE} \
     uv pip install --system -U transformers==4.52.4
 
-# Copy the fine-tuning script into the container
-COPY ./unsloth_trainer.py /home/${USR}/unsloth_trainer.py
-
-WORKDIR /home/${USR}
+WORKDIR /home/${USR}/src
 
 # endless running task to avoid container to be stopped
 CMD [ "/bin/bash" , "-c", "tail -f /dev/null" ]

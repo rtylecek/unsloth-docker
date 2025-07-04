@@ -69,10 +69,10 @@ def train(model, template, output_path, log_path, num_epochs, num_proc, max_seq_
     model = FastLanguageModel.get_peft_model(
         model,
         r=16,
-        finetune_vision_layers     = False, # Turn off for just text!
-        finetune_language_layers   = True,  # Should leave on!
-        finetune_attention_modules = True,  # Attention good for GRPO
-        finetune_mlp_modules       = True,  # Should leave on always!
+        # finetune_vision_layers     = False, # Turn off for just text!
+        # finetune_language_layers   = True,  # Should leave on!
+        # finetune_attention_modules = True,  # Attention good for GRPO
+        # finetune_mlp_modules       = True,  # Should leave on always!
         # target_modules=[
         #     "q_proj",
         #     "k_proj",
