@@ -3,15 +3,16 @@
     "configurations": [
         {
             "name": "Python: Train Unsloth Model",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/unsloth_trainer.py",
+            "program": "${workspaceFolder}/src/unsloth_trainer.py",
+            "cwd": "${workspaceFolder}/src",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {},
             "args": [
                 "--model", "unsloth/gemma-7b-bnb-4bit",
-                "--output_path", "~/Code/unsloth-docker/output/gemma-7b-bnb-4bit",
+                "--output_path", "~/unsloth/train",
                 "--num_epochs=1",
                 "--num_proc=12",
                 "--seq_length=2048"
