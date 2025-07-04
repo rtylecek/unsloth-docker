@@ -44,7 +44,7 @@ sh run_docker.sh <version> <gpu-id(s)> <data-path> <train-path> <trainer-script>
 ### Example usage:
 
 ```sh
-sh run_docker.sh 0.1 0 /data/huggingface/ ~/unsloth unsloth_trainer.py --host=10.2.23.35
+sh run_docker.sh 0.1 0 /data/huggingface/ ~/unsloth unsloth_trainer.py --host=10.1.2.3
 ```
 
 - `<version>`: Docker image version tag (e.g., 0.1)
@@ -56,6 +56,8 @@ sh run_docker.sh 0.1 0 /data/huggingface/ ~/unsloth unsloth_trainer.py --host=10
 - `[--host=EXTERNAL_IP]`: (Optional) Host IP for distributed training or networking
 
 This will start the container and allow you to begin training your models inside the Docker environment.
+
+Tensorboard is started automatically with the provided host address and port (default is http://localhost:6006/)
 
 ## Further information
 
