@@ -1,7 +1,11 @@
 {
   "name": "Unsloth Trainer Dev Container",
   "build": {
-    "dockerfile": "../Dockerfile"
+    "dockerfile": "../Dockerfile",
+    "args": {
+      "UID": "1011",
+      "GID": "1011"
+    }
   },
   "customizations": {
     "vscode": {
